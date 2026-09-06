@@ -1,0 +1,984 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -496,
+        -16
+      ],
+      "id": "4c63ffbf-b164-403a-b33d-234cdccc0ba8",
+      "name": "When chat message received",
+      "webhookId": "1a59252f-ce62-4f84-8aff-287009acc5e4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Hey, act like you are a professional data analyst. you have a decades of experience in analyzing data and finding the great insights from it. here your task is to analyse the data and see the deta sheet given and find out to fenrate the good report which kind of parameters we can use to analyze it (like. very simple eg. Avarage) so return that in a very clear way and tell us what can we analyze"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "ee44b828-5576-4989-8268-43b96fd8be30",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        736,
+        224
+      ],
+      "id": "12dadb17-1c9c-4773-b20d-0c03f4a401ca",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "8G5zysS6FHcZ7NOh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"name\": \"Tirth Patel\",\n    \"branch\": \"electrical engienearing\",\n    \"collage\": \"Amitty\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        864
+      ],
+      "id": "cd637100-18f4-4e60-a1a5-ff057bfcd2e9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ `${$json.data} \\n \\n ${$json.text}` }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "so, you will receive 2 things. \n1st, a report in which it will there what kind of analysis you can do. \n2nd, a csv data, from where you can get the better context\nYour Tasks:\n- you will give the output in a specified manner as a mentioned below clearly. # most important rule and task\n- you have to understand the report and tell us, between which columns we can draw a graph.\n- wile returning remember x and y should be name of the csv column.\n- and in between you think that some of the columns are missing then calculate them internally using python for better precision. for eg. lets say you have the data like this, Column A: Weight of the food product in grams; Column B: Price of the Product, to analyze if report says you can analyze gram per rupee then you have to divide A by B so you have to do those calculation and return the calculated values in the specified format described below.\n- if you don't need to add columns then please leave the array empty.\n- and while returning extraColumns you also need to return the calculated values with name of the Column for the columns. don't just return the Name or only values. return like this, eg = \"extraCcolumns\": [\n    [\"Grade\", \"A\", \"B\", \"C\", \"D\", \"F\"], [\"Rank\", 12, 23, 34, 45, 56]\n  ]\n- you can provide any graph types you are not restricted to give it from the egs. "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1216,
+        -32
+      ],
+      "id": "9206e499-ed9f-4c3f-9998-19118670c6f9",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        656,
+        1024
+      ],
+      "id": "ac6c1c2d-9768-40ba-82e4-94a00a49385a",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "8G5zysS6FHcZ7NOh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"plots\": [\n      {\n        \"plot_type\": \"line\",\n         \"x\": \"Reg. No.\",\n          \"y\": \"End Sem\",\n          \"title\": \"PTSP End Sem Marks Distribution\"\n      },\n      {\n        \"plot_type\": \"histogram\",\n        \"x\": \"Total\",\n        \"title\": \"PTSP Total Marks Distribution\"\n        }\n    ],\n  \"extraCcolumns\": [\n    [\"Grade\", \"A\", \"B\", \"C\", \"D\", \"F\"], [\"Rank\", 12, 23, 34, 45, 56]\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        160
+      ],
+      "id": "33ec97e4-ed24-4603-aee9-ca58d823ece6",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "pythonNative",
+        "pythonCode": "import json\nimport pandas as pd\nimport matplotlib.pyplot as plt\nfrom datetime import datetime \nimport os\ndef make_line_graph(x,y,title,filename):\n    plt.figure()\n    plt.plot(x,y)\n    plt.title(title)\n    plt.xlabel('Students----->')\n    plt.ylabel('Marks---->')\n    plt.xticks(rotation=75,fontsize=7)\n    plt.tight_layout()\n    plt.savefig(filename)\n    plt.close()\n    return\n\ndef make_histogram(data,title,filename):\n    plt.figure()\n    plt.hist(data,bins=range(0,101,10))\n    plt.title(title)\n    plt.savefig(filename)\n    plt.close()\n    return\n\ndef make_scatter_plot(x,y,title,filename):\n    plt.figure()\n    plt.scatter(x,y)\n    plt.title(title)\n    plt.xlabel('Students----->')\n    plt.ylabel('Marks---->')\n    plt.xticks(rotation=75,fontsize=7)\n    plt.tight_layout()\n    plt.savefig(filename)\n    plt.close()\n    return\n\ndef make_bar_chart(data,x,y,title,filename):\n    plt.figure()\n    data=data.sort_values(by=x)\n    plt.bar(data[x],data[y])\n    plt.title(title)\n    plt.xlabel('Students----->')\n    plt.ylabel('Marks---->')\n    plt.xticks(rotation=90,fontsize=7)\n    plt.tight_layout()\n    plt.savefig(filename)\n    plt.close()\n    return\n\nresponse = _item[\"json\"][\"firstItem\"][\"output\"][\"plots\"]\n# response='''{\n    \n# \"plots\": [\n# {\n# \"plot_type\": \"line\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"Total\",\n# \"title\": \"Total Marks vs Student\"\n# },\n# {\n# \"plot_type\": \"line\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"Mid Term\",\n# \"title\": \"Mid Term Marks vs Student\"\n# },\n# {\n# \"plot_type\": \"line\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"End Sem\",\n# \"title\": \"End Semester Marks vs Student\"\n# },\n# {\n# \"plot_type\": \"histogram\",\n# \"x\": \"Total\",\n# \"title\": \"Distribution of Total Marks\"\n# },\n# {\n# \"plot_type\": \"histogram\",\n# \"x\": \"Mid Term\",\n# \"title\": \"Distribution of Mid Term Marks\"\n# },\n# {\n# \"plot_type\": \"histogram\",\n# \"x\": \"End Sem\",\n# \"title\": \"Distribution of End Semester Marks\"\n# },\n# {\n# \"plot_type\": \"scatter\",\n# \"x\": \"Mid Term\",\n# \"y\": \"End Sem\",\n# \"title\": \"Mid Term vs End Semester\"\n# },\n# {\n# \"plot_type\": \"scatter\",\n# \"x\": \"Rank\",\n# \"y\": \"Total\",\n# \"title\": \"Rank vs Total Marks\"\n# },\n# {\n# \"plot_type\": \"scatter\",\n# \"x\": \"Mid Term\",\n# \"y\": \"Total\",\n# \"title\": \"Mid Term vs Total Marks\"\n# },\n# {\n# \"plot_type\": \"bar\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"Total\",\n# \"title\": \"Total Marks of Students\"\n# },\n# {\n# \"plot_type\": \"bar\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"Mid Term\",\n# \"title\": \"Mid Term Marks of Students\"\n# },\n# {\n# \"plot_type\": \"bar\",\n# \"x\": \"Reg. No.\",\n# \"y\": \"End Sem\",\n# \"title\": \"End Semester Marks of Students\"\n# }\n# ]\n# }'''\n\n\n# try:\n#     parameters=json.loads(response)\n# except json.JSONDecodeError:\n#     print('Cant decode')\n#     exit()\n\ndata=pd.read_csv(\"/output/data.csv\",na_values='AB')\n\n# try:\n#     plots=parameters['plots']\n# except KeyError:\n#     print('Wrong key by llm')\n#     exit()\n\ntry:\n    plots = _item[\"json\"][\"firstItem\"][\"output\"][\"plots\"]\nexcept KeyError:\n    print('Wrong key by llm')\n    exit()\n\nunique_plots=[]\nfor plot in plots:\n    if plot not in unique_plots:\n        unique_plots.append(plot)\n\nfoldername=\"/output/my plots\"\nif not os.path.exists(foldername):\n    os.mkdir(foldername)\nrun_id = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\nfolder=os.path.join(foldername,run_id)\nif not os.path.exists(folder):\n    os.mkdir(folder)\ncounter=1\nfor plot in unique_plots:\n    try:\n        if plot['plot_type'] == \"line\":\n            filename=os.path.join(folder,f\"line_{counter}.png\")\n            make_line_graph(data[plot['x']],data[plot['y']],plot['title'],filename)\n        elif plot['plot_type'] == \"histogram\":\n            filename=os.path.join(folder,f\"histogram_{counter}.png\")\n            make_histogram(data[plot['x']],plot['title'],filename)\n        elif plot['plot_type'] == \"scatter\":\n            filename=os.path.join(folder,f\"scatter_{counter}.png\")\n            make_scatter_plot(data[plot['x']],data[plot['y']],plot['title'],filename)\n        elif plot['plot_type'] == \"bar\":\n            filename=os.path.join(folder,f\"bar_{counter}.png\")\n            make_bar_chart(data,plot['x'],plot['y'],plot['title'],filename)\n        else:\n            print('Unsupported plot type')\n        counter+=1\n    except KeyError:\n        print(\"Invalid key error\")\n    except TimeoutError:\n        print(\"Timeout\")\n    except TypeError:\n        print(\"Type error\")\n\nreturn(\n  {\n    \"name\": run_id\n  }\n)"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -32
+      ],
+      "id": "6f719633-6eeb-45ba-8318-5f5f287d63ff",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ `${$('Merge1').item.json.data} \\n \\n ${$('Merge1').item.json.text}` }}",
+        "options": {
+          "systemMessage": "=You are a  professional data analyst. you have a decades of experience in analyzing data and finding the great insights from it you are famous in the industry because you never miss any details and always finds unique insights and inferences.\nwe will provide the following things,\n- csv data\n- graphs as a images\n- a note of one fellow analyst who will suggest what you can analyze but don't relay completely on that you have to always use your brain power to complete your task \nTasks:\n- you have to generate very detailed and perfect report after analyzing the data in the markdown syntax  \nInstruction for report Generation:\n- great report has images so, to add images of graph do one thing, write the markdown like this,\n![Graph 1](my plots/{{ $('Code in Python').item.json.name }}/graph1.png) - while adding the image remember always use the given path but change the name of the image as per the requirement \n- the generated report should look very good and professional also it should contain all the details.",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2512,
+        -32
+      ],
+      "id": "805093fb-9a3c-4710-87c7-7000987f1621",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.chatInput\n\ntry {\n    const lines = text\n        .split(/\\r?\\n/)\n        .filter(line => line.trim() !== '');\n\n    // Must have at least header + 1 row\n    if (lines.length < 2) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    // Detect delimiter\n    const delimiters = [',', ';', '\\t'];\n\n    let delimiter = null;\n    let columnCount = 0;\n\n    for (const d of delimiters) {\n        const cols = lines[0].split(d).length;\n\n        if (cols >= 2) {\n            delimiter = d;\n            columnCount = cols;\n            break;\n        }\n    }\n\n    if (!delimiter) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    // Every row must have same number of columns\n    const validStructure = lines.every(line =>\n        line.split(delimiter).length === columnCount\n    );\n\n    if (!validStructure) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    const fs = require('fs');\n\n    fs.writeFileSync('/output/data.csv', text);\n\n    return [{\n        json: {\n            isCsv: true,\n            text\n        }\n    }];\n\n} catch (error) {\n    return [{\n        json: {\n            isCsv: false,\n            text,\n            error: error.message\n        }\n    }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        -16
+      ],
+      "id": "5af3f0cc-d553-4543-84fe-12da71b4844d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "05dc6c4e-cc5b-486c-9e5a-2e76f18cddec",
+              "leftValue": "={{ $json.isCsv }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "cc13fd9d-4a65-4442-8693-743ec74e8777",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Hey, your task is convert the given data in csv and return it into given format. the given data can be in any format table space spreted peragraph or even a normal paragraph but you have to do your job"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        240
+      ],
+      "id": "aa4a085f-6a17-4dcd-b3eb-b6f681d10d6e",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        416
+      ],
+      "id": "d2888e5e-0ede-43e5-9c2c-4e1befcb9660",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "YNhg431LDuGmJRZg",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"csv\": \"Student_ID,Study_Hours_Per_Week,Attendance_Percentage,Final_Exam_Marks\\n101,5,72,58\\n102,7,78,64\\n103,8,81,69\\n104,10,85,73\\n110,20,98,97\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        432
+      ],
+      "id": "899810d3-b411-4db7-a4a0-ff4c31055a11",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.output.csv\n\ntry {\n    const lines = text\n        .split(/\\r?\\n/)\n        .filter(line => line.trim() !== '');\n\n    // Must have at least header + 1 row\n    if (lines.length < 2) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    // Detect delimiter\n    const delimiters = [',', ';', '\\t'];\n\n    let delimiter = null;\n    let columnCount = 0;\n\n    for (const d of delimiters) {\n        const cols = lines[0].split(d).length;\n\n        if (cols >= 2) {\n            delimiter = d;\n            columnCount = cols;\n            break;\n        }\n    }\n\n    if (!delimiter) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    // Every row must have same number of columns\n    const validStructure = lines.every(line =>\n        line.split(delimiter).length === columnCount\n    );\n\n    if (!validStructure) {\n        return [{ json: { isCsv: false, text } }];\n    }\n\n    const fs = require('fs');\n\n    fs.writeFileSync('data.csv', text);\n\n    return [{\n        json: {\n            isCsv: true,\n            text\n        }\n    }];\n\n} catch (error) {\n    return [{\n        json: {\n            isCsv: false,\n            text,\n            error: error.message\n        }\n    }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        240
+      ],
+      "id": "0d2475d9-8616-4917-9637-533a681dfe15",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "05dc6c4e-cc5b-486c-9e5a-2e76f18cddec",
+              "leftValue": "={{ $json.isCsv }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        240
+      ],
+      "id": "f35d7de1-dcf7-4f94-85bb-06064d1c3474",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        -240
+      ],
+      "id": "c32f4ba3-63d4-457d-9f0e-3ce938b28827",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        -240
+      ],
+      "id": "a45076a3-245d-401f-9f0a-f4fad132d3b0",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "2667da13-02bd-4bc1-9e95-3a843c98a3fd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        -32
+      ],
+      "id": "ed60577e-d100-4d3f-a444-c4ecf998f84e",
+      "name": "Merge1",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\n\nconst columns = $input.first().json.output.extraCcolumns\n\nconsole.log(typeof columns)\nconsole.log(columns)\nconsole.log(Array.isArray(columns))\nlet csv = fs.readFileSync('/output/data.csv', 'utf8');\n\nlet rows = csv\n  .trim()\n  .split('\\n')\n  .map(row => row.split(','));\n\n// Safety check\nfor (const column of columns) {\n  if (column.length !== rows.length) {\n    throw new Error(\n      `Column \"${column[0]}\" has ${column.length - 1} values but CSV has ${rows.length - 1} data rows`\n    );\n  }\n}\n\n// Add all new headers\nfor (const column of columns) {\n  rows[0].push(column[0]);\n}\n\n// Add all values\nfor (let rowIndex = 1; rowIndex < rows.length; rowIndex++) {\n  for (const column of columns) {\n    rows[rowIndex].push(column[rowIndex]);\n  }\n}\n\nconst updatedCsv = rows\n  .map(row => row.join(','))\n  .join('\\n');\n\nfs.writeFileSync('/output/data.csv', updatedCsv);\n\nreturn [\n  {\n    json: {\n      itemCount: $input.all().length,\n      firstItem: $input.all()[0]?.json,\n      secondItem: $input.all()[1]?.json\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -32
+      ],
+      "id": "c86ad9a4-25b4-4ffb-b361-0e4a15b9fed2",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        896
+      ],
+      "id": "85213669-b828-4cd6-a765-6ea9ae5c691f",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "YNhg431LDuGmJRZg",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        2672,
+        208
+      ],
+      "id": "e9b7981a-9fde-4aca-9a3c-34a3fa82a274",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "google/gemma-4-31b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        208
+      ],
+      "id": "427808eb-6117-46f0-a4e6-fb7a9c28a46c",
+      "name": "OpenRouter Chat Model3",
+      "credentials": {
+        "openRouterApi": {
+          "id": "5NIz1HavRMOAWZDq",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "hey you will see the 3 images your task is to analyze them and write a proper report on them in Google docs\nyou can name document anything but the report should be written inside the doc\nmain task is you have to also imbed given images into google doc don't forget to do that (they are very importent for the report)",
+        "options": {
+          "systemMessage": "You are a helpful assistant and it is mandatory for you to call tools\nand if user says to insert images into google docs then please fulfill those requests",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        720,
+        624
+      ],
+      "id": "a50e23e2-d925-461d-8db0-aef6a99439ed",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "test"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        784,
+        864
+      ],
+      "id": "84be13fc-15a2-4344-95ad-ea4646b1eb4d",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {\n  json: {},\n  binary: {}\n};\n\nfor (let i = 0; i < items.length; i++) {\n  result.binary[`image${i + 1}`] = items[i].binary.data;\n}\n\nreturn [result];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        -32
+      ],
+      "id": "01041b1a-28dd-44da-8fb5-7bf6bbcc940b",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "folderId": "1I9SR90SC6zbvL0CNYUjMsMvHclc6WidU",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        640
+      ],
+      "id": "06fe9733-3bfb-418c-82ba-cd3913bdd3d5",
+      "name": "Create a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "JXjsLTMwuTWAYWih",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        656
+      ],
+      "id": "1eca7fe4-58fd-4865-a789-47cca24fd395",
+      "name": "Update a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "JXjsLTMwuTWAYWih",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        192
+      ],
+      "id": "b21d4741-8104-4354-8a3c-8879599c179b",
+      "name": "OpenRouter Chat Model4",
+      "credentials": {
+        "openRouterApi": {
+          "id": "q8DUjhpH39UZPtFi",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/home/node/.n8n-files/my plots/{{ $json.name }}/*",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2016,
+        -32
+      ],
+      "id": "943f025b-49a1-4c5e-8704-c94e7eac936a",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "model": "gemma3:4b-it-qat",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        864
+      ],
+      "id": "70f15b24-d0bd-4884-a597-616ea7dc9d73",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "BZjmMliXEfNA7sZi",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/.n8n-files/report.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        3104,
+        -32
+      ],
+      "id": "11b8bd1a-970e-441c-879d-e60d01b50d28",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2864,
+        -32
+      ],
+      "id": "66be1f2c-c9a0-4669-94f2-85fecf025aaf",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        832
+      ],
+      "id": "3f351b69-8361-40f0-afe6-78d624a29d83",
+      "name": "Structured Output Parser3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Update a document in Google Docs": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "OpenRouter Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        []
+      ]
+    },
+    "Read/Write Files from Disk2": {
+      "main": [
+        []
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3bc2fa11-a07e-4882-a249-8ffab688385f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "05078e3b2bd236ebdc15a8a97d02475bf735ab0bde66e57b6b99416013f1c32e"
+  },
+  "nodeGroups": [],
+  "id": "BvMfcTqmjUTgCaDK",
+  "tags": []
+}
